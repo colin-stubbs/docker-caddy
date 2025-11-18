@@ -55,8 +55,17 @@
 }
 
 :80 {
+	# block access to the /badness/ path. Because reasons but mostly examples.
+  @deny {
+    path "/badness/*"
+  }
+
   # test if the User-Agent appears to include an email address
 	@identified header_regexp User-Agent ^.+@.+\..+$
+
+  handle @deny {
+    respond "Access denied" 403
+  }
 
   # if the User-Agent identified itself (email address) then it gets a higher rate limit
 	handle @identified {
