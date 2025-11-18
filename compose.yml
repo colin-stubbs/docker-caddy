@@ -1,0 +1,17 @@
+---
+services:
+  caddy:
+    build:
+      context: .
+    image: colinstubbs/caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    #volumes:
+      #- content:/usr/share/caddy
+      #- ./example/Caddyfile:/etc/caddy/Caddyfile
+      # persistent logs if desired
+      #- logs:/var/log/caddy
+
+#volumes:
+#  content:

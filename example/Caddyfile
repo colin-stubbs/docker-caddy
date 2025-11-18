@@ -1,0 +1,74 @@
+{
+  log default {
+    output file /var/log/caddy/caddy.log
+    format json
+  }
+  auto_https off
+
+  servers :80 {
+    name http
+  }
+  default_bind 0.0.0.0
+}
+
+(identified-rate) {
+	rate_limit {
+		zone default {
+			key {remote_host}
+			events 375
+			window 5s
+		}
+		log_key
+	}
+}
+
+(anonymous-rate) {
+	rate_limit {
+		zone default {
+			key {remote_host}
+			events 10
+			window 5s
+		}
+		log_key
+	}
+}
+
+(logging) {
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 10mb
+			roll_keep 5
+			roll_keep_for 1h
+		}
+	}
+}
+
+(static-only) {
+	# ensure JSON files are served as JSON
+	route "/*.json" {
+		header Content-Type application/json
+	}
+
+	# static content
+	root * /usr/share/caddy
+	file_server
+}
+
+:80 {
+  # test if the User-Agent appears to include an email address
+	@identified header_regexp User-Agent ^.+@.+\..+$
+
+  # if the User-Agent identified itself (email address) then it gets a higher rate limit
+	handle @identified {
+		import identified-rate
+		import static-only
+	}
+
+  # otherwise it gets the lower default rate for anonymous user agents
+	handle {
+		import anonymous-rate
+		import static-only
+	}
+
+	import logging
+}
