@@ -3,7 +3,7 @@ FROM golang:alpine AS builder
 
 # build the custom certspotter binary
 RUN go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest && \
-  xcaddy build --with github.com/mholt/caddy-ratelimit
+  xcaddy build --with github.com/mholt/caddy-ratelimit --with github.com/caddy-dns/cloudflare
 
 # Final image
 FROM alpine:3
